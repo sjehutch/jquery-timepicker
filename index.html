@@ -14,66 +14,73 @@
     <script type="text/javascript" src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-timepicker-addon.js"></script>
     <script type="text/javascript" src="js/jquery-ui-timepicker-addon-i18n.min.js"></script>
-<script type="text/javascript">
+    <script type="text/javascript">
     $(document).ready(function () {
+        var minimumDate = 1, minimumHours = 7, minimumMinute = 0;
+        var date = new Date();
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        if (hours >= 7 && hours <= 19) {
+            minimumDate = 1;
+            minimumHours = hours;
+        } else {
+            minimumDate = 2;
+            minimumHours = 7;
+        }
+
+        if (Math.round(minutes/15) === 4) {
+            minimumHours += 1;
+            minimumMinute = (Math.round(minutes/15)) * 15;
+        } else {
+            minimumMinute = (Math.round(minutes/15)) * 15;
+        }
+
         var date1 = $('#date1');
         var date2 = $('#date2');
 
         date1.datetimepicker({
             numberOfMonths: 2,
-            minDate: 1,
-            maxDate: 30,
             hourMin: 7,
-            hourMax: 18
+            hourMax: 19,
+            stepMinute: 15,
+            controlType: 'select',
+            oneLine: true,
+            timeFormat: 'hh:mm tt',
+            timezone: 'PT',
+            minDate: minimumDate
         });
 
-        date2.timepicker({
-            hourMin: 7,
-            hourMax: 18,
-            stepHour: 2
-        });
+        var onDemandDate = new Date();
+        var onDemandHours = onDemandDate.getHours();
 
-        $('#getdt1').click(function () {
-            var date = date1.datetimepicker('getDate');
-            if (date != null) {
-                $("#msg1").html(formatDate(date));
-            }
-        });
-
-        $('#getdt2').click(function () {
-            var date = date2.datetimepicker('getDate');
-            if (date != null) {
-                $("#msg2").html(formatDate(date));
-            }
-        });
-
-        function formatDate(date) {
-            var hours = date.getHours();
-            var minutes = date.getMinutes();
-            var ampm = hours >= 12 ? 'pm' : 'am';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            var strTime = hours + ':' + minutes + ' ' + ampm;
-            return date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear() + "  " + strTime;
+        if (onDemandHours >= 7 && onDemandHours <= 17) {
+            date2.datetimepicker({
+                hourMin: Math.round(onDemandHours + 2 + (minimumMinute / 60)),
+                hourMax: 19,
+                controlType: 'select',
+                stepMinute: 15,
+                oneLine: true,
+                timeFormat: 'hh:mm tt',
+                minDate: '0',
+                maxDate: '0'
+            });
+        } else {
+            date2.attr('placeholder', 'Closed');
+            date2.prop('disabled', true);
         }
     })
 </script>
 </head>
 <body>
 	<div class="container">
-		<p>Set DateTime</p>
+		<p>Catering</p>
 		<div>
             <input type="text" name="date1" id="date1" value="">
-            <button id="getdt1" value="1">Get Datetime</button>
-            <div id="msg1"></div>
-		</div>	
-        <p>Set Time</p>
+		</div>
+        <p>On-Demand</p>
         <div>
             <input type="text" name="date2" id="date2" value="">
-            <button id="getdt2" value="1">Get Datetime</button>
-            <div id="msg2"></div>
-        </div>	
+        </div>
     </div>
 </body>
 </html>
